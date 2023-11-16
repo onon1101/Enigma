@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "start": "node --experimental-modules --es-module-specifier-resolution=node Javascript/src/index.ts",
+    "ts-start": "npx ts-node Javascript/src/index.ts",
+    "test": "mocha -r ts-node/register test/**/*.test.ts"
+  },
+  "name": "untitled1",
+  "version": "1.0.0",
+  "main": "Javascript/src/index.ts",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^10.0.4",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@types/chai": "^4.3.10",
+    "chai": "^4.3.10"
+  }
+}

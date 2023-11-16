@@ -1,47 +1,5 @@
-
-
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toLowerCase();
-
-
-var config = {
-    rotorOne: "ekmflgdqvzntowyhxuspaibrcj",
-    rotorTwo: "zouesydkfwpciqxhmvblgnjrat",
-    rotorThree: "ehrvxgaobqusimzflynwktpdjc",
-}
-
-let RotorNumbers = {
-    rotorOne: 0,
-    rotorTwo: 0,
-    rotorThree: 0,
-}
-
-var turnovers = "ejmzalyxvbwfcrquontspikhgd"
-
-const GetIndexAlphabet = (idx: string) => alphabet.indexOf(idx);
-const GetIndexTurnovers = (idx: string) => turnovers.indexOf(idx);
-const GetIndexRotors = (idx: string, key: string) => {
-    return config[key].indexOf(idx);
-};
-const GetOffsetRotor = (Rotors, key) => Rotors[key];
-
-const checkOverRotorRange = (Rotors) => {
-    const keyRotor = Object.keys(Rotors);
-    keyRotor.forEach((key, idx) => {
-        console.log(idx, RotorNumbers[key]);
-        if (idx === 2 && RotorNumbers[key] >= 26) {
-            RotorNumbers[key] = 0;
-        }
-       if (Rotors[key] >= 26) {
-           Rotors[keyRotor[idx + 1]] = Rotors[keyRotor[idx + 1]] + 1;
-           Rotors[key] = 0;
-       }
-    });
-}
-
-const SetOffsetPlusOne = (Rotors: any) => {
-    checkOverRotorRange(Rotors);
-    Rotors.rotorOne = Rotors.rotorOne + 1;
-}
+import {MappingTable, RotorNumbers, alphabet, TMapping, TOrder} from './RotorsConfig';
+import Functional from "./Functional";
 
 class Enigma {
     constructor(string: string) {
@@ -49,33 +7,41 @@ class Enigma {
         // console.log(Enigma.encrypt('a', config, RotorNumbers));
         // console.log(Enigma.encrypt('a', config, RotorNumbers));
         // console.table(RotorNumbers);
-        return Enigma.encrypt(string, config, RotorNumbers);
+        return Enigma.encrypt(string, MappingTable, RotorNumbers);
     }
 
-    static encrypt(str: string, rotors: any, rotorsOffset: Object) {
+    static encrypt(str: string, rotors: any, rotorsOffset: Object): Array<string> {
+        let funct = new Functional(MappingTable, RotorNumbers);
+
         const encryptChar = (char: string) => {
-            let result = char;
-            const keyRotorForward = Object.keys(config);
-            const keyRotorReverse = Object.keys(config).reverse();
+            let result: string = char;
+            const keyRotorForward = Object.keys(MappingTable);
+            const keyRotorReverse = Object.keys(MappingTable).reverse();
 
             // 順向
-            keyRotorForward.forEach((key) => {
-                result = rotors[key][(GetIndexAlphabet(result) + GetOffsetRotor(rotorsOffset, key)) % 26];
-                // console.log(result);
+            keyRotorForward.forEach((key: string) => {
+                if (key === "turnovers") {
+                    return;
+                }
+                result = rotors[key][(funct.GetIndexAlphabet(result) + funct.GetOffsetRotor(key)) % 26];
+                // console.log(result, funct.GetIndexAlphabet(result),);
             });
 
             // 反射板
-            result = alphabet[GetIndexTurnovers(result)];
+            result = alphabet[funct.GetIndexMappingTable('turnovers', result)];
 
             // 逆向
             keyRotorReverse.forEach((key) => {
-                result = alphabet[(GetIndexRotors(result, key) + GetOffsetRotor(rotorsOffset, key)) % 26];
+                if (key === "turnovers") {
+                    return;
+                }
+                result = alphabet[(funct.GetIndexMappingTable(key, result) + funct.GetOffsetRotor(key)) % 26];
                 // console.log(result);
             })
 
-            SetOffsetPlusOne(rotorsOffset);
+            funct.SetOffsetPlusOne();
             // console.log(result);
-            console.table(RotorNumbers);
+            // console.table(RotorNumbers);
             return result;
         }
 
